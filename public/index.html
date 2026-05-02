@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MailBlast Pro — Bulk Email Platform</title>
+  <meta name="description" content="Send personalized bulk emails to all your clients instantly with MailBlast Pro." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Animated background -->
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">✉</div>
+      <span class="logo-text">MailBlast <span class="logo-accent">Pro</span></span>
+    </div>
+    <div class="header-badge" id="statusBadge">
+      <span class="badge-dot disconnected"></span>
+      <span id="statusText">Not Connected</span>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- STEP 1: SMTP Config -->
+  <section class="card" id="smtpCard">
+    <div class="card-header">
+      <div class="step-num">1</div>
+      <div>
+        <h2 class="card-title">SMTP Configuration</h2>
+        <p class="card-subtitle">Connect your email account to start sending</p>
+      </div>
+      <button class="collapse-btn" id="smtpToggle" onclick="toggleSection('smtpBody', 'smtpToggle')">▲</button>
+    </div>
+    <div class="card-body" id="smtpBody">
+      <div class="preset-row">
+        <span class="preset-label">Quick Preset:</span>
+        <button class="preset-btn" onclick="applyPreset('gmail')">Gmail</button>
+        <button class="preset-btn" onclick="applyPreset('outlook')">Outlook</button>
+        <button class="preset-btn" onclick="applyPreset('yahoo')">Yahoo</button>
+        <button class="preset-btn" onclick="applyPreset('custom')">Custom</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="label">SMTP Host</label>
+          <input id="smtpHost" class="input" type="text" placeholder="smtp.gmail.com" />
+        </div>
+        <div class="form-group">
+          <label class="label">Port</label>
+          <input id="smtpPort" class="input" type="number" placeholder="587" />
+        </div>
+        <div class="form-group">
+          <label class="label">Your Email (Username)</label>
+          <input id="smtpUser" class="input" type="email" placeholder="you@gmail.com" />
+        </div>
+        <div class="form-group">
+          <label class="label">Password / App Password</label>
+          <div class="input-eye">
+            <input id="smtpPass" class="input" type="password" placeholder="••••••••••••" />
+            <button class="eye-btn" onclick="togglePass()">👁</button>
+          </div>
+        </div>
+      </div>
+      <div class="hint-box">
+        <span>💡</span>
+        <span>For Gmail, enable 2FA and use an <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link">App Password</a> instead of your regular password.</span>
+      </div>
+      <button class="btn btn-primary" id="connectBtn" onclick="connectSMTP()">
+        <span class="btn-icon">🔌</span> Test & Connect
+      </button>
+    </div>
+  </section>
+
+  <!-- STEP 2: Recipients -->
+  <section class="card" id="recipientsCard">
+    <div class="card-header">
+      <div class="step-num">2</div>
+      <div>
+        <h2 class="card-title">Recipients</h2>
+        <p class="card-subtitle">Add client email addresses</p>
+      </div>
+      <div class="count-badge" id="recipientCount">0 contacts</div>
+    </div>
+    <div class="card-body" id="recipientsBody">
+
+      <div class="tabs">
+        <button class="tab active" id="tab-manual" onclick="switchTab('manual')">✏️ Manual Entry</button>
+        <button class="tab" id="tab-csv" onclick="switchTab('csv')">📂 Import CSV</button>
+      </div>
+
+      <!-- Manual Tab -->
+      <div id="panel-manual">
+        <div class="inline-add">
+          <input id="newEmail" class="input" type="email" placeholder="client@example.com" onkeydown="if(event.key==='Enter') addEmail()" />
+          <input id="newName" class="input" type="text" placeholder="Name (optional)" onkeydown="if(event.key==='Enter') addEmail()" />
+          <button class="btn btn-secondary" onclick="addEmail()">+ Add</button>
+        </div>
+        <div class="bulk-paste-wrap">
+          <label class="label">Paste multiple emails (one per line or comma-separated)</label>
+          <textarea id="bulkPaste" class="textarea" rows="3" placeholder="alice@example.com&#10;bob@example.com&#10;carol@example.com"></textarea>
+          <button class="btn btn-ghost" onclick="importPaste()">Import Pasted Emails</button>
+        </div>
+      </div>
+
+      <!-- CSV Tab -->
+      <div id="panel-csv" style="display:none">
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('csvFile').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+          <div class="drop-icon">📂</div>
+          <p class="drop-text">Drag & drop CSV file here, or <span class="link">click to browse</span></p>
+          <p class="drop-hint">CSV must have an <code>email</code> column. Optional: <code>name</code> column for personalization.</p>
+          <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="uploadCSV(this.files[0])" />
+        </div>
+      </div>
+
+      <!-- Email List -->
+      <div id="emailListWrap" style="display:none">
+        <div class="list-header">
+          <span id="listCount">0 recipients</span>
+          <button class="btn btn-ghost btn-sm" onclick="clearAll()">🗑 Clear All</button>
+        </div>
+        <div class="email-list" id="emailList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: Compose Email -->
+  <section class="card" id="composeCard">
+    <div class="card-header">
+      <div class="step-num">3</div>
+      <div>
+        <h2 class="card-title">Compose Email</h2>
+        <p class="card-subtitle">Write your message — use <code>{{name}}</code> to personalize</p>
+      </div>
+    </div>
+    <div class="card-body" id="composeBody">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="label">Sender Name</label>
+          <input id="fromName" class="input" type="text" placeholder="Your Company Name" />
+        </div>
+        <div class="form-group">
+          <label class="label">From Email</label>
+          <input id="fromEmail" class="input" type="email" placeholder="you@gmail.com" />
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:1rem">
+        <label class="label">Subject Line</label>
+        <input id="subject" class="input" type="text" placeholder="Exciting news for {{name}}! 🎉" />
+      </div>
+      <div class="form-group" style="margin-top:1rem">
+        <div class="body-toolbar">
+          <label class="label">Email Body</label>
+          <div class="toolbar-right">
+            <button class="tool-btn" onclick="insertTag('{{name}}')">+ Name</button>
+            <label class="toggle-label">
+              <input type="checkbox" id="htmlToggle" onchange="toggleHtml()" />
+              <span>HTML Mode</span>
+            </label>
+          </div>
+        </div>
+        <textarea id="emailBody" class="textarea body-area" rows="10" placeholder="Hi {{name}},&#10;&#10;We have something amazing for you...&#10;&#10;Best regards,&#10;Your Team"></textarea>
+      </div>
+
+      <div class="form-group" style="margin-top:1rem">
+        <label class="label">Delay Between Emails (ms) — prevents spam flags</label>
+        <input id="sendDelay" class="input" type="number" value="500" min="0" max="10000" />
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: Send -->
+  <section class="card send-card" id="sendCard">
+    <div class="send-summary" id="sendSummary">
+      <div class="summary-item">
+        <span class="summary-num" id="sumRecipients">0</span>
+        <span class="summary-label">Recipients</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-num" id="sumSubject">—</span>
+        <span class="summary-label">Subject</span>
+      </div>
+      <div class="summary-divider"></div>
+      <div class="summary-item">
+        <span class="summary-num" id="sumStatus">Ready</span>
+        <span class="summary-label">Status</span>
+      </div>
+    </div>
+
+    <button class="btn btn-send" id="sendBtn" onclick="sendEmails()">
+      <span id="sendBtnIcon">🚀</span>
+      <span id="sendBtnText">Launch Campaign</span>
+    </button>
+
+    <!-- Progress -->
+    <div id="progressWrap" style="display:none">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <div class="progress-stats">
+        <span id="progressText">Sending 0 of 0...</span>
+        <span id="progressPct">0%</span>
+      </div>
+    </div>
+
+    <!-- Live Feed -->
+    <div id="liveFeed" style="display:none">
+      <div class="feed-header">Live Feed</div>
+      <div class="feed-list" id="feedList"></div>
+    </div>
+
+    <!-- Results -->
+    <div id="resultsWrap" style="display:none">
+      <div class="results-grid">
+        <div class="result-stat sent">
+          <span class="result-num" id="resSent">0</span>
+          <span class="result-label">✅ Sent</span>
+        </div>
+        <div class="result-stat failed">
+          <span class="result-num" id="resFailed">0</span>
+          <span class="result-label">❌ Failed</span>
+        </div>
+        <div class="result-stat total">
+          <span class="result-num" id="resTotal">0</span>
+          <span class="result-label">📧 Total</span>
+        </div>
+      </div>
+      <button class="btn btn-ghost" onclick="downloadReport()">📥 Download Report</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
