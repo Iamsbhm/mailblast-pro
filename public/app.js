@@ -52,11 +52,16 @@ async function connectSMTP() {
   }
 
   try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000); // 15s client-side timeout
+
     const res = await fetch('/api/connect', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
+    clearTimeout(timer);
     const data = await res.json();
 
     if (data.success) {
@@ -71,7 +76,11 @@ async function connectSMTP() {
       showToast('❌ ' + data.message, 'error');
     }
   } catch (e) {
-    showToast('❌ Connection failed: ' + e.message, 'error');
+    if (e.name === 'AbortError') {
+      showToast('❌ Connection timed out. Check your email, password and SMTP settings.', 'error');
+    } else {
+      showToast('❌ Connection failed: ' + e.message, 'error');
+    }
   }
 
   btn.disabled = false;

@@ -29,9 +29,19 @@ app.post('/api/connect', async (req, res) => {
       secure: secure === true || port === '465',
       auth: { user, pass },
       tls: { rejectUnauthorized: false },
-      family: 4  // Force IPv4 — fixes ENETUNREACH on Render/cloud hosts
+      family: 4,              // Force IPv4
+      connectionTimeout: 10000, // 10s to establish TCP connection
+      greetingTimeout: 10000,   // 10s for SMTP greeting
+      socketTimeout: 15000      // 15s idle socket timeout
     });
-    await transporter.verify();
+
+    // Race verify() against a 12-second timeout
+    await Promise.race([
+      transporter.verify(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Connection timed out. Check your host/port or App Password.')), 12000)
+      )
+    ]);
     res.json({ success: true, message: 'SMTP connected successfully!' });
   } catch (err) {
     transporter = null;
