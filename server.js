@@ -28,7 +28,8 @@ app.post('/api/connect', async (req, res) => {
       port: parseInt(port) || 587,
       secure: secure === true || port === '465',
       auth: { user, pass },
-      tls: { rejectUnauthorized: false }
+      tls: { rejectUnauthorized: false },
+      family: 4  // Force IPv4 — fixes ENETUNREACH on Render/cloud hosts
     });
     await transporter.verify();
     res.json({ success: true, message: 'SMTP connected successfully!' });
