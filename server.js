@@ -1,3 +1,7 @@
+// Force IPv4 DNS resolution globally — fixes ENETUNREACH on Render/cloud (Node 17+ defaults to IPv6)
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first');
+
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
