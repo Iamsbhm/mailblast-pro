@@ -41,13 +41,14 @@
       <div class="step-num">1</div>
       <div>
         <h2 class="card-title">SMTP Configuration</h2>
-        <p class="card-subtitle">Connect your email account to start sending</p>
+        <p class="card-subtitle">Use <strong style="color:#22d17a">Brevo</strong> (recommended for cloud) or Gmail direct</p>
       </div>
       <button class="collapse-btn" id="smtpToggle" onclick="toggleSection('smtpBody', 'smtpToggle')">▲</button>
     </div>
     <div class="card-body" id="smtpBody">
       <div class="preset-row">
         <span class="preset-label">Quick Preset:</span>
+        <button class="preset-btn preset-recommended" onclick="applyPreset('brevo')">⭐ Brevo</button>
         <button class="preset-btn" onclick="applyPreset('gmail')">Gmail</button>
         <button class="preset-btn" onclick="applyPreset('outlook')">Outlook</button>
         <button class="preset-btn" onclick="applyPreset('yahoo')">Yahoo</button>
@@ -74,9 +75,22 @@
           </div>
         </div>
       </div>
-      <div class="hint-box">
+      <div class="hint-box hint-brevo" id="hintBrevo">
+        <span>⭐</span>
+        <div>
+          <strong>Brevo is recommended</strong> — Gmail SMTP is often blocked on cloud servers.<br/>
+          <strong>Setup in 2 min:</strong>
+          <ol style="margin:6px 0 0 1rem;line-height:1.8">
+            <li>Sign up free at <a href="https://app.brevo.com" target="_blank" class="link">brevo.com</a></li>
+            <li>Go to <b>SMTP &amp; API → SMTP</b> and copy your <b>Login</b> &amp; <b>Password</b></li>
+            <li>Paste them below — set <b>From Email</b> to your Gmail in Step 3</li>
+          </ol>
+          Free tier: <b>300 emails/day</b> ✅
+        </div>
+      </div>
+      <div class="hint-box" id="hintGmail" style="display:none">
         <span>💡</span>
-        <span>For Gmail, enable 2FA and use an <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link">App Password</a> instead of your regular password.</span>
+        <span>Enable Gmail 2FA then use an <a href="https://myaccount.google.com/apppasswords" target="_blank" class="link">App Password</a>. May timeout on cloud — use Brevo instead.</span>
       </div>
       <button class="btn btn-primary" id="connectBtn" onclick="connectSMTP()">
         <span class="btn-icon">🔌</span> Test & Connect
