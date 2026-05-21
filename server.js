@@ -123,6 +123,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// ─── ClipGenius ──────────────────────────────────────────────────────────────
+app.get('/clipper', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'clipper.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`\n🚀 Email Blast Platform running at http://localhost:${PORT}\n`);
+  console.log(`\n🚀 Email Blast Platform running at http://localhost:${PORT}`);
+  console.log(`⚡ ClipGenius running at http://localhost:${PORT}/clipper\n`);
 });

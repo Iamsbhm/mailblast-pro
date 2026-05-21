@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ClipGenius — AI-powered YouTube Shorts auto-clipper. Paste any YouTube link and instantly get viral-ready clips for your channel.">
+  <title>ClipGenius — AI YouTube Shorts Clipper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="clipper.css">
+  <!-- ⚙️ PRODUCTION: Replace the URL below with your Render backend URL after deploying -->
+  <!-- Example: <script>window.CLIPGENIUS_API = 'https://clipgenius-api.onrender.com';</script> -->
+  <!-- Leave empty for local development (auto-uses localhost:5000) -->
+  <script>
+    // window.CLIPGENIUS_API = 'https://YOUR-APP.onrender.com';
+  </script>
+
+</head>
+<body>
+
+  <!-- ─── Animated Background ─────────────────────────────────────────────── -->
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- ─── Header ──────────────────────────────────────────────────────────── -->
+  <header class="header">
+    <nav class="nav">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Clip<span class="logo-accent">Genius</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#how-it-works" class="nav-link" id="nav-how-it-works">How it works</a>
+        <a href="#monetize" class="nav-link" id="nav-monetize">Monetize</a>
+        <button class="btn-nav-cta" id="btn-nav-get-started" onclick="document.getElementById('url-input').focus()">Get Started Free</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ─── Hero ────────────────────────────────────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      AI-Powered Viral Detection
+    </div>
+    <h1 class="hero-title">
+      Turn Any YouTube Video<br>
+      Into <span class="gradient-text">Viral Shorts</span>
+    </h1>
+    <p class="hero-subtitle">
+      Paste a link. Our AI finds the hottest moments, clips them into perfect 9:16 Shorts,
+      and adds subtitles — ready to upload in minutes.
+    </p>
+
+    <!-- ─── Main Input Card ─────────────────────────────────────────────── -->
+    <div class="input-card" id="input-section">
+      <div class="input-wrapper">
+        <div class="input-icon">▶</div>
+        <input
+          type="url"
+          id="url-input"
+          class="url-input"
+          placeholder="Paste YouTube link here... e.g. https://youtube.com/watch?v=..."
+          autocomplete="off"
+          spellcheck="false"
+        >
+        <button class="btn-fetch" id="btn-fetch">
+          <span class="btn-text">Analyze</span>
+          <span class="btn-icon">→</span>
+        </button>
+      </div>
+
+      <!-- Video Preview (hidden until fetched) -->
+      <div class="video-preview" id="video-preview" style="display:none">
+        <img class="preview-thumb" id="preview-thumb" src="" alt="Video thumbnail">
+        <div class="preview-info">
+          <div class="preview-title" id="preview-title"></div>
+          <div class="preview-meta">
+            <span class="meta-tag" id="preview-channel">📺</span>
+            <span class="meta-tag" id="preview-duration">⏱</span>
+            <span class="meta-tag" id="preview-views">👁</span>
+          </div>
+          <div class="preview-actions">
+            <div class="options-grid">
+              <div class="option-group">
+                <label class="option-label">Number of Clips</label>
+                <select class="option-select" id="opt-num-clips">
+                  <option value="2">2 clips</option>
+                  <option value="3">3 clips</option>
+                  <option value="4" selected>4 clips</option>
+                  <option value="5">5 clips</option>
+                  <option value="6">6 clips</option>
+                </select>
+              </div>
+              <div class="option-group">
+                <label class="option-label">Clip Length</label>
+                <select class="option-select" id="opt-clip-length">
+                  <option value="30">30 seconds</option>
+                  <option value="45" selected>45 seconds</option>
+                  <option value="58">58 seconds (max)</option>
+                </select>
+              </div>
+              <div class="option-group toggle-group">
+                <label class="option-label">Auto Subtitles</label>
+                <label class="toggle">
+                  <input type="checkbox" id="opt-subtitles" checked>
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="option-group">
+                <label class="option-label">Watermark (optional)</label>
+                <input type="text" id="opt-watermark" class="option-input" placeholder="@YourChannel">
+              </div>
+            </div>
+            <button class="btn-generate" id="btn-generate">
+              <span>✨ Generate Shorts</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch Mode Toggle -->
+    <button class="btn-batch-toggle" id="btn-batch-toggle" style="display:none">
+      + Add another video (batch mode)
+    </button>
+  </section>
+
+  <!-- ─── Processing Section ──────────────────────────────────────────────── -->
+  <section class="processing-section" id="processing-section" style="display:none">
+    <div class="processing-card">
+      <div class="processing-icon-ring">
+        <div class="processing-icon">🎬</div>
+      </div>
+      <h2 class="processing-title" id="processing-title">Processing your video...</h2>
+      <p class="processing-phase" id="processing-phase">Starting up...</p>
+      
+      <div class="progress-bar-wrapper">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+          <div class="progress-glow" id="progress-glow" style="left: 0%"></div>
+        </div>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+
+      <div class="processing-steps">
+        <div class="step" id="step-download">
+          <div class="step-icon">⬇️</div>
+          <div class="step-label">Downloading</div>
+          <div class="step-status" id="step-download-status">waiting</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" id="step-analyze">
+          <div class="step-icon">🧠</div>
+          <div class="step-label">AI Analysis</div>
+          <div class="step-status" id="step-analyze-status">waiting</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" id="step-export">
+          <div class="step-icon">✂️</div>
+          <div class="step-label">Clipping</div>
+          <div class="step-status" id="step-export-status">waiting</div>
+        </div>
+        <div class="step-divider"></div>
+        <div class="step" id="step-ready">
+          <div class="step-icon">🎉</div>
+          <div class="step-label">Ready!</div>
+          <div class="step-status" id="step-ready-status">waiting</div>
+        </div>
+      </div>
+
+      <button class="btn-cancel" id="btn-cancel">Cancel</button>
+    </div>
+  </section>
+
+  <!-- ─── Results Section ─────────────────────────────────────────────────── -->
+  <section class="results-section" id="results-section" style="display:none">
+    <div class="results-header">
+      <div class="results-title-block">
+        <h2 class="results-title">🎉 Your Shorts Are Ready!</h2>
+        <p class="results-subtitle" id="results-subtitle">4 viral clips generated</p>
+      </div>
+      <div class="results-actions">
+        <button class="btn-download-all" id="btn-download-all">⬇ Download All</button>
+        <button class="btn-new-video" id="btn-new-video">+ New Video</button>
+      </div>
+    </div>
+
+    <div class="clips-grid" id="clips-grid">
+      <!-- Clip cards injected by JS -->
+    </div>
+  </section>
+
+  <!-- ─── How It Works ────────────────────────────────────────────────────── -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-header">
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">Three steps to viral-ready Shorts</p>
+    </div>
+    <div class="steps-row">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-icon">🔗</div>
+        <h3>Paste the Link</h3>
+        <p>Drop any YouTube video URL — long-form, podcasts, tutorials, anything.</p>
+      </div>
+      <div class="how-step-arrow">→</div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-icon">🧠</div>
+        <h3>AI Finds the Gold</h3>
+        <p>Our AI analyzes audio energy, speech density, and keywords to find the most engaging moments.</p>
+      </div>
+      <div class="how-step-arrow">→</div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-icon">📱</div>
+        <h3>Download &amp; Upload</h3>
+        <p>Get perfectly-formatted 9:16 Shorts with subtitles. Upload to YouTube, TikTok, Instagram Reels.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Monetization Section ────────────────────────────────────────────── -->
+  <section class="monetize-section" id="monetize">
+    <div class="section-header">
+      <h2 class="section-title gradient-text">Grow &amp; Monetize Your Channel</h2>
+      <p class="section-subtitle">Use ClipGenius to build a profitable YouTube presence</p>
+    </div>
+    <div class="tips-grid">
+      <div class="tip-card">
+        <div class="tip-icon">💰</div>
+        <h3>YouTube Partner Program</h3>
+        <p>Reach 500 subscribers + 3,000 watch hours (or 1M Shorts views) to start earning ad revenue.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">📈</div>
+        <h3>Shorts Drive Traffic</h3>
+        <p>Each Short links viewers back to your long-form content, compounding your watch hours fast.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🎯</div>
+        <h3>Niche Compilation Channels</h3>
+        <p>Create "Best of [Topic]" Shorts channels. They grow fast and can be monetized via sponsorships.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🔗</div>
+        <h3>Affiliate Marketing</h3>
+        <p>Add affiliate links in your Short descriptions. Even micro-channels earn $500–$2,000/month this way.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🎪</div>
+        <h3>Sell Clip Services</h3>
+        <p>Many creators pay $10–$30 per Short for editing. Use this tool to serve multiple clients at scale.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🚀</div>
+        <h3>Cross-Platform Growth</h3>
+        <p>Same clip → YouTube Shorts + TikTok + Instagram Reels = 3× the audience, 3× the growth.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ──────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">Clip<span class="logo-accent">Genius</span></span>
+      </div>
+      <p class="footer-text">Built to help creators grow faster. 🚀</p>
+    </div>
+  </footer>
+
+  <!-- ─── Toast Notification ──────────────────────────────────────────────── -->
+  <div class="toast" id="toast"></div>
+
+  <script src="clipper.js"></script>
+</body>
+</html>

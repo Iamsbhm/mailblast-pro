@@ -2,3 +2,18 @@ node_modules/
 .env
 *.log
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ClipGenius temp files (never upload videos/clips to git)
+clipper_api/uploads/
+clipper_api/clips/
+clipper_api/jobs/
+
+# OS
+Thumbs.db

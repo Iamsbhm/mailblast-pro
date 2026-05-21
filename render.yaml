@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: clipgenius-api
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: FLASK_ENV
+        value: production
+    autoDeploy: true
